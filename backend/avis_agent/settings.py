@@ -4,8 +4,11 @@ load_dotenv()
 
 from pathlib import Path
 import os
+from django.core.wsgi import get_wsgi_application
 
-# ... reste du fichier
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'avis_agent.settings')
+
+application = get_wsgi_application()
 
 
 
@@ -29,6 +32,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -39,7 +43,15 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# CORS pour Vercel
+CORS_ALLOWED_ORIGINS = [
+    "https://ton-app.vercel.app",  # ← tu mettras l'URL Vercel après
+]
+CORS_ALLOW_ALL_ORIGINS = False  # ← remplace True par False
+
 ROOT_URLCONF = 'avis_agent.urls'
 
 TEMPLATES = [{'BACKEND': 'django.template.backends.django.DjangoTemplates','DIRS': [],'APP_DIRS': True,'OPTIONS': {'context_processors': ['django.template.context_processors.request','django.contrib.auth.context_processors.auth','django.contrib.messages.context_processors.messages',]},}]
