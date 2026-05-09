@@ -50,6 +50,25 @@ CORS_ALLOWED_ORIGINS = [
     "https://agentreponse.vercel.app",
     "https://agentreponse-3e18fojfl-bouyesaturnins-projects.vercel.app",
 ]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'origin',
+    'x-csrftoken',
+    'x-requested-with',
+]
 CORS_ALLOW_ALL_ORIGINS = False  # ← remplace True par False
 
 ROOT_URLCONF = 'avis_agent.urls'
