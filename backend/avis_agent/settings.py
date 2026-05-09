@@ -45,8 +45,10 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # CORS pour Vercel
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
     "http://localhost:5174",
-    "https://ton-app.vercel.app",  # ← on mettra l'URL Vercel après
+    "https://agentreponse.vercel.app",
+    "https://agentreponse-3e18fojfl-bouyesaturnins-projects.vercel.app",
 ]
 CORS_ALLOW_ALL_ORIGINS = False  # ← remplace True par False
 
