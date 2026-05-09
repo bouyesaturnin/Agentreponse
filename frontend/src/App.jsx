@@ -5,7 +5,7 @@ const API = "https://agentreponse-production.up.railway.app/api";
 const ETOILES = (n) => "★".repeat(n) + "☆".repeat(5 - n);
 const NOTE_COLOR = (n) => n >= 4 ? "#10B981" : n === 3 ? "#D4A843" : "#EF4444";
 const PLATEFORMES = ["google","trustpilot","tripadvisor","autre"];
-const SECTEURS = ["Restaurant / Bar","Hôtel / Hébergement","Commerce de détail","Clinique / Santé","Agence immobilière","Garage / Auto","Beauté / Bien-être / Santé / Avocat","Autre"];
+const SECTEURS = ["Restaurant / Bar","Hôtel / Hébergement","Commerce de détail","Clinique / Santé","Agence immobilière","Garage / Auto","Beauté / Bien-être / Santé","Avocat","Autre"];
 
 export default function App() {
   const [onglet, setOnglet] = useState("generer");
