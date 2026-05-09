@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Crimson+Pro:wght@300;400;500&display=swap');
+
+:root {
+  --bg-deep:     #060D0F;
+  --bg-panel:    #0B1719;
+  --bg-card:     #0F2026;
+  --bg-input:    #081518;
+  --emerald:     #10B981;
+  --emerald-dim: #065F46;
+  --emerald-glow:#34D399;
+  --gold:        #D4A843;
+  --white:       #F0F7F4;
+  --muted:       #5A8A7A;
+  --border:      #1A3A35;
+  --red:         #EF4444;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--white);
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--emerald-dim); border-radius: 3px; }
+
+input, textarea, select {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--white);
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  padding: 10px 14px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--emerald);
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+}
+input::placeholder, textarea::placeholder { color: var(--muted); }
+select option { background: var(--bg-panel); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+}
+
+.fade-up  { animation: fadeUp 0.45s ease forwards; }
+.fade-up-2{ animation: fadeUp 0.45s 0.1s ease both; }
+
+button { cursor: pointer; font-family: 'Crimson Pro', serif; transition: all 0.2s; border: none; }
+button:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+button:disabled { cursor: not-allowed; opacity: 0.45; }
