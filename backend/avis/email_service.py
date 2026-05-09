@@ -124,8 +124,11 @@ def envoyer_reponse_email(destinataire, data):
     msg.attach(MIMEText(html, "html", "utf-8"))
 
     # Envoi via Gmail SMTP
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(settings.GMAIL_USER, settings.GMAIL_PASSWORD)
-        server.sendmail(settings.GMAIL_USER, destinataire, msg.as_string())
+    # Par ceci (port 587 avec STARTTLS) :
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+         server.ehlo()
+         server.starttls()
+         server.login(settings.GMAIL_USER, settings.GMAIL_PASSWORD)
+         server.sendmail(settings.GMAIL_USER, destinataire, msg.as_string())
 
     return 202
