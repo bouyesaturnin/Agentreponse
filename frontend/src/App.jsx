@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = "http://localhost:8081/api";
+const API = "https://agentreponse-production.up.railway.app/api";
 const ETOILES = (n) => "★".repeat(n) + "☆".repeat(5 - n);
 const NOTE_COLOR = (n) => n >= 4 ? "#10B981" : n === 3 ? "#D4A843" : "#EF4444";
 const PLATEFORMES = ["google","trustpilot","tripadvisor","autre"];
