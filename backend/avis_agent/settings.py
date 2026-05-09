@@ -4,11 +4,7 @@ load_dotenv()
 
 from pathlib import Path
 import os
-from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'avis_agent.settings')
-
-application = get_wsgi_application()
 
 
 
@@ -34,6 +30,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     
     'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -48,7 +45,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # CORS pour Vercel
 CORS_ALLOWED_ORIGINS = [
-    "https://ton-app.vercel.app",  # ← tu mettras l'URL Vercel après
+     "http://localhost:5174",  # ← tu mettras l'URL Vercel après
 ]
 CORS_ALLOW_ALL_ORIGINS = False  # ← remplace True par False
 
