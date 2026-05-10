@@ -69,7 +69,7 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
-CORS_ALLOW_ALL_ORIGINS = False  # ← remplace True par False
+CORS_ALLOW_ALL_ORIGINS = True  # ← remplace True par False
 
 ROOT_URLCONF = 'avis_agent.urls'
 
