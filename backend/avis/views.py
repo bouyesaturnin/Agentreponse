@@ -1,4 +1,5 @@
 import json
+import logging
 import urllib.request
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -6,6 +7,7 @@ from django.conf import settings
 from .models import ReponseAvis
 from .email_service import envoyer_reponse_email
 
+logger = logging.getLogger(__name__)
 
 DEMO_REPONSES = {
     5: "Merci infiniment pour ce retour chaleureux, {auteur} ! 🙏 Toute notre équipe est ravie que votre expérience ait été à la hauteur de vos attentes. Votre satisfaction est notre plus belle récompense. Nous vous attendons avec plaisir pour une prochaine visite !",
@@ -131,9 +133,13 @@ class EnvoyerEmailView(APIView):
 
         try:
             avis = ReponseAvis.objects.get(id=avis_id)
+
             if reponse_editee:
                 avis.reponse_finale = reponse_editee
                 avis.save()
+
+            # Log pour debug
+            logger.error(f"RESEND_API_KEY = '{settings.RESEND_API_KEY[:10]}...'")
 
             status_code = envoyer_reponse_email(destinataire, {
                 "nom_entreprise": avis.nom_entreprise,
@@ -144,53 +150,12 @@ class EnvoyerEmailView(APIView):
                 "reponse": avis.reponse_finale,
             })
 
-            if status_code in [200, 202]:
+            if status_code in [200, 201, 202]:
                 return Response({"ok": True, "message": f"Email envoyé à {destinataire}"})
             else:
-                return Response({"error": f"Erreur SendGrid : {status_code}"}, status=500)
+                return Response({"error": f"Erreur envoi : {status_code}"}, status=500)
 
         except Exception as e:
             import traceback
-            print("=== ERREUR DÉTAILLÉE ===")
             traceback.print_exc()
-            print("========================")
             return Response({"error": str(e)}, status=500)
-
-# class EnvoyerEmailView(APIView):
-#     def post(self, request):
-#         d = request.data
-#         destinataire = d.get("email_destinataire")
-#         avis_id = d.get("avis_id")
-#         reponse_editee = d.get("reponse")
-
-#         if not destinataire:
-#             return Response({"error": "Email destinataire requis"}, status=400)
-#         if not avis_id:
-#             return Response({"error": "ID de l'avis requis"}, status=400)
-
-#         try:
-#             avis = ReponseAvis.objects.get(id=avis_id)
-
-#             # Sauvegarder la réponse éditée si modifiée
-#             if reponse_editee:
-#                 avis.reponse_finale = reponse_editee
-#                 avis.save()
-
-#             status_code = envoyer_reponse_email(destinataire, {
-#                 "nom_entreprise": avis.nom_entreprise,
-#                 "plateforme": avis.plateforme,
-#                 "auteur_avis": avis.auteur_avis,
-#                 "note": avis.note,
-#                 "contenu_avis": avis.contenu_avis,
-#                 "reponse": avis.reponse_finale,
-#             })
-
-#             if status_code in [200, 202]:
-#                 return Response({"ok": True, "message": f"Email envoyé à {destinataire}"})
-#             else:
-#                 return Response({"error": f"Erreur SendGrid : {status_code}"}, status=500)
-
-#         except ReponseAvis.DoesNotExist:
-#             return Response({"error": "Avis introuvable"}, status=404)
-#         except Exception as e:
-#             return Response({"error": str(e)}, status=500)
