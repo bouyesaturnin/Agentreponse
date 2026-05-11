@@ -79,8 +79,9 @@ DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3','NAME': BASE_DIR
 
 GMAIL_USER = os.environ.get('GMAIL_USER', '').strip()
 GMAIL_PASSWORD = os.environ.get('GMAIL_PASSWORD', '').strip()
-MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY', '').strip()
-MAILGUN_DOMAIN = os.environ.get('MAILGUN_DOMAIN', '').strip()
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '').strip()
+# MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY', '').strip()
+# MAILGUN_DOMAIN = os.environ.get('MAILGUN_DOMAIN', '').strip()
 
 
 

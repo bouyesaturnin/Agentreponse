@@ -1,8 +1,7 @@
-import smtplib
 import urllib.request
 import urllib.parse
 import json
-import base64
+import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from django.conf import settings
@@ -72,41 +71,38 @@ def build_html(data):
 
 
 def envoyer_reponse_email(destinataire, data):
-    """
-    Envoi email via l'API Mailgun (HTTP) — contourne les restrictions SMTP de Railway.
-    Fallback sur SMTP si MAILGUN_API_KEY n'est pas défini.
-    """
     note = int(data.get("note", 5))
     label_note = NOTE_LABEL.get(note, "")
     plateforme = data.get("plateforme", "").capitalize()
     auteur = data.get("auteur_avis", "")
 
     html = build_html(data)
-    subject = f"✦ Réponse prête — Avis {plateforme} de {auteur} ({label_note})"
+    subject = f"Réponse prête — Avis {plateforme} de {auteur} ({label_note})"
 
-    mailgun_api_key = getattr(settings, 'MAILGUN_API_KEY', '')
-    mailgun_domain = getattr(settings, 'MAILGUN_DOMAIN', '')
+    resend_api_key = getattr(settings, 'RESEND_API_KEY', '').strip()
 
-    if mailgun_api_key and mailgun_domain:
-        # Envoi via Mailgun HTTP API
-        url = f"https://api.mailgun.net/v3/{mailgun_domain}/messages"
-        credentials = base64.b64encode(f"api:{mailgun_api_key}".encode()).decode()
+    if resend_api_key:
+        # Envoi via Resend HTTP API
+        payload = json.dumps({
+            "from": "ReponsIA <onboarding@resend.dev>",
+            "to": [destinataire],
+            "subject": subject,
+            "html": html,
+        }).encode("utf-8")
 
-        form_data = urllib.parse.urlencode({
-            'from': f"ReponsIA <mailgun@{mailgun_domain}>",
-            'to': destinataire,
-            'subject': subject,
-            'html': html,
-        }).encode('utf-8')
-
-        req = urllib.request.Request(url, data=form_data, headers={
-            'Authorization': f'Basic {credentials}',
-        })
+        req = urllib.request.Request(
+            "https://api.resend.com/emails",
+            data=payload,
+            headers={
+                "Authorization": f"Bearer {resend_api_key}",
+                "Content-Type": "application/json",
+            }
+        )
         with urllib.request.urlopen(req) as resp:
             return resp.status
 
     else:
-        # Fallback SMTP (pour dev local)
+        # Fallback SMTP Gmail pour dev local
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
         msg["From"] = settings.GMAIL_USER
