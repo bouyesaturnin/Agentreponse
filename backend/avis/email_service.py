@@ -84,7 +84,7 @@ def envoyer_reponse_email(destinataire, data):
     if resend_api_key:
         # Envoi via Resend HTTP API
         payload = json.dumps({
-            "from": "ReponsIA <onboarding@resend.dev>",
+            "from": "ReponsIA <bouyesaturnin@yahoo.fr>",
             "to": [destinataire],
             "subject": subject,
             "html": html,
