@@ -1,5 +1,5 @@
 import urllib.request
-import urllib.parse
+import urllib.error
 import json
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -82,9 +82,8 @@ def envoyer_reponse_email(destinataire, data):
     resend_api_key = getattr(settings, 'RESEND_API_KEY', '').strip()
 
     if resend_api_key:
-        # Envoi via Resend HTTP API
         payload = json.dumps({
-            "from": "ReponsIA <bouyesaturnin@yahoo.fr>",
+            "from": "ReponsIA <onboarding@resend.dev>",
             "to": [destinataire],
             "subject": subject,
             "html": html,
@@ -98,8 +97,12 @@ def envoyer_reponse_email(destinataire, data):
                 "Content-Type": "application/json",
             }
         )
-        with urllib.request.urlopen(req) as resp:
-            return resp.status
+        try:
+            with urllib.request.urlopen(req) as resp:
+                return resp.status
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode('utf-8')
+            raise Exception(f"Resend error {e.code}: {error_body}")
 
     else:
         # Fallback SMTP Gmail pour dev local
