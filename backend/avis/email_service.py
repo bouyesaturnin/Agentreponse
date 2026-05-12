@@ -79,22 +79,24 @@ def envoyer_reponse_email(destinataire, data):
     html = build_html(data)
     subject = f"Réponse prête — Avis {plateforme} de {auteur} ({label_note})"
 
-    resend_api_key = getattr(settings, 'RESEND_API_KEY', '').strip()
+    brevo_api_key = getattr(settings, 'BREVO_API_KEY', '').strip()
 
-    if resend_api_key:
+    if brevo_api_key:
+        # Envoi via Brevo HTTP API
         payload = json.dumps({
-            "from": "ReponsIA <onboarding@resend.dev>",
-            "to": [destinataire],
+            "sender": {"name": "ReponsIA", "email": "bouye1978saturnin@gmail.com"},
+            "to": [{"email": destinataire}],
             "subject": subject,
-            "html": html,
+            "htmlContent": html,
         }).encode("utf-8")
 
         req = urllib.request.Request(
-            "https://api.resend.com/emails",
+            "https://api.brevo.com/v3/smtp/email",
             data=payload,
             headers={
-                "Authorization": f"Bearer {resend_api_key}",
+                "api-key": brevo_api_key,
                 "Content-Type": "application/json",
+                "Accept": "application/json",
             }
         )
         try:
@@ -102,7 +104,7 @@ def envoyer_reponse_email(destinataire, data):
                 return resp.status
         except urllib.error.HTTPError as e:
             error_body = e.read().decode('utf-8')
-            raise Exception(f"Resend error {e.code}: {error_body}")
+            raise Exception(f"Brevo error {e.code}: {error_body}")
 
     else:
         # Fallback SMTP Gmail pour dev local
