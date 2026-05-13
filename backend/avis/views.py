@@ -1,5 +1,4 @@
 import json
-import logging
 import urllib.request
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,14 +6,43 @@ from django.conf import settings
 from .models import ReponseAvis
 from .email_service import envoyer_reponse_email
 
-logger = logging.getLogger(__name__)
 
 DEMO_REPONSES = {
-    5: "Merci infiniment pour ce retour chaleureux, {auteur} ! 🙏 Toute notre équipe est ravie que votre expérience ait été à la hauteur de vos attentes. Votre satisfaction est notre plus belle récompense. Nous vous attendons avec plaisir pour une prochaine visite !",
-    4: "Merci beaucoup pour votre avis positif, {auteur} ! Nous sommes heureux que votre expérience se soit bien passée. Votre retour nous est précieux et nous aide à nous améliorer continuellement. À très bientôt !",
-    3: "Merci pour votre retour, {auteur}. Nous prenons note de vos remarques et nous engageons à améliorer les points que vous avez soulevés. N'hésitez pas à nous contacter directement pour qu'on puisse échanger à ce sujet.",
-    2: "Merci de nous avoir partagé votre expérience, {auteur}. Nous sommes sincèrement désolés que votre visite n'ait pas répondu à vos attentes. Pourriez-vous nous contacter directement afin que nous puissions trouver une solution ?",
-    1: "Nous vous présentons nos sincères excuses, {auteur}. La situation que vous décrivez ne reflète pas nos standards de qualité. Nous vous invitons à nous contacter directement afin de comprendre ce qui s'est passé et vous apporter une réponse adaptée.",
+    "professionnel": {
+        5: "Nous vous remercions sincèrement pour votre retour positif, {auteur}. Votre satisfaction représente notre priorité absolue et constitue la meilleure reconnaissance de notre engagement quotidien. Nous serions ravis de vous accueillir à nouveau très prochainement.",
+        4: "Nous vous remercions pour votre avis, {auteur}. Votre retour constructif nous est précieux et nous permet d'améliorer continuellement la qualité de nos services. Nous espérons avoir le plaisir de vous accueillir à nouveau.",
+        3: "Nous vous remercions pour votre retour, {auteur}. Nous prenons note de vos observations et mettons tout en œuvre pour améliorer votre expérience. N'hésitez pas à nous contacter directement pour tout échange complémentaire.",
+        2: "Nous vous remercions d'avoir pris le temps de partager votre expérience, {auteur}. Nous regrettons que votre visite n'ait pas répondu à vos attentes et nous vous invitons à nous contacter afin de trouver une solution adaptée.",
+        1: "Nous vous présentons nos sincères excuses pour cette expérience, {auteur}. La situation décrite ne reflète pas nos standards de qualité et nous souhaitons y remédier. Veuillez nous contacter directement pour que nous puissions vous apporter une réponse appropriée.",
+    },
+    "chaleureux": {
+        5: "Merci infiniment pour ce retour si chaleureux, {auteur} ! 🙏 Toute notre équipe est vraiment touchée par vos mots et ravie que votre expérience ait été aussi belle. On vous attend avec impatience pour une prochaine fois !",
+        4: "Merci beaucoup pour votre avis positif, {auteur} ! On est vraiment contents que votre expérience se soit bien passée. Vos retours nous aident à nous améliorer chaque jour. À très bientôt !",
+        3: "Merci pour votre retour honnête, {auteur}. On prend vos remarques très à cœur et on va travailler pour faire mieux. N'hésitez pas à nous écrire directement — votre avis compte vraiment pour nous !",
+        2: "Merci d'avoir partagé votre vécu, {auteur}. On est vraiment désolés que ça ne se soit pas passé comme vous l'espériez. Contactez-nous directement — on tient à arranger les choses pour vous !",
+        1: "On vous présente nos sincères excuses, {auteur}. Ce que vous décrivez ne nous ressemble pas du tout et on le prend très au sérieux. Appelez-nous directement — on veut vraiment comprendre et tout faire pour réparer ça.",
+    },
+    "formel": {
+        5: "Nous vous adressons nos plus vifs remerciements pour votre témoignage, {auteur}. Votre appréciation constitue pour nos équipes une source de motivation et d'encouragement dans l'exercice de leurs missions. Nous demeurons à votre disposition pour tout futur service.",
+        4: "Nous vous remercions de l'attention portée à notre établissement, {auteur}. Votre évaluation a été dûment prise en considération par nos services. Nous restons à votre entière disposition.",
+        3: "Nous accusons réception de votre évaluation, {auteur}, et vous remercions de l'intérêt que vous portez à notre établissement. Vos observations feront l'objet d'un examen attentif de notre part.",
+        2: "Nous avons bien pris connaissance de votre retour, {auteur}, et vous remercions de nous en avoir informés. Nous vous invitons à prendre contact avec nos services afin que nous puissions examiner votre situation dans les meilleurs délais.",
+        1: "Nous accusons réception de votre signalement, {auteur}, et vous présentons nos excuses pour les désagréments occasionnés. Nous vous invitons à contacter notre service relations clientèle afin qu'une solution puisse vous être proposée dans les meilleurs délais.",
+    },
+    "dynamique": {
+        5: "WOW, merci {auteur} ! 🌟 Ça fait vraiment plaisir de lire ça ! Toute l'équipe est aux anges — on met tout notre cœur dans ce qu'on fait et savoir que ça se ressent, c'est la meilleure récompense. On vous attend vite !",
+        4: "Super retour {auteur}, merci ! 😊 Ravi que ça vous ait plu ! On est en constante amélioration et vos retours sont notre carburant. À très bientôt !",
+        3: "Merci {auteur} pour ce retour franc ! On note tout ça et on s'améliore. Si vous voulez en discuter, on est là — on adore les échanges directs !",
+        2: "Aïe, désolé pour ça {auteur} ! Ce n'est vraiment pas ce qu'on veut vous faire vivre. Contactez-nous vite — on va régler ça ensemble !",
+        1: "Oh non {auteur}, vraiment désolés ! Ce n'est pas du tout le niveau qu'on veut offrir. Contactez-nous immédiatement — on prend ça très au sérieux et on va tout faire pour arranger la situation.",
+    },
+}
+
+TONS_PROMPTS = {
+    "professionnel": "professionnel et soigné, avec un vocabulaire soutenu mais accessible",
+    "chaleureux": "chaleureux, humain et authentique, comme si tu parlais à un ami",
+    "formel": "très formel et institutionnel, avec un vocabulaire corporate et protocolaire",
+    "dynamique": "dynamique, enthousiaste et moderne, avec de l'énergie et de la spontanéité",
 }
 
 
@@ -49,7 +77,10 @@ class GenerateReponseView(APIView):
                 return Response({"error": f"Champ requis : {f}"}, status=400)
 
         note = int(d["note"])
-        prompt = f"""Tu es un community manager expert. Rédige une réponse professionnelle, chaleureuse et personnalisée à cet avis client.
+        ton = d.get("ton", "chaleureux")
+        ton_description = TONS_PROMPTS.get(ton, TONS_PROMPTS["chaleureux"])
+
+        prompt = f"""Tu es un community manager expert. Rédige une réponse {ton_description} à cet avis client.
 
 Entreprise : {d["nom_entreprise"]} (secteur : {d["secteur"]})
 Plateforme : {d["plateforme"]}
@@ -57,18 +88,18 @@ Auteur : {d["auteur_avis"]}
 Note : {note}/5
 Avis : {d["contenu_avis"]}
 
-Règles :
+Règles strictes :
 - Maximum 4 phrases
-- Ton adapté à la note
+- Ton : {ton_description}
 - Commence par remercier l'auteur par son prénom
-- Pas d'emojis excessifs (max 1)
+- Pas d'emojis excessifs (max 1 si ton chaleureux/dynamique, aucun si professionnel/formel)
 - Termine par une invitation à revenir (note >= 3) ou à contacter directement (note <= 2)
 
-Réponds UNIQUEMENT avec la réponse, sans explication."""
+Réponds UNIQUEMENT avec la réponse, sans explication ni introduction."""
 
         reponse = call_claude(prompt)
         if reponse is None:
-            template = DEMO_REPONSES.get(note, DEMO_REPONSES[3])
+            template = DEMO_REPONSES.get(ton, DEMO_REPONSES["chaleureux"]).get(note, DEMO_REPONSES["chaleureux"][3])
             reponse = template.format(auteur=d["auteur_avis"])
 
         obj = ReponseAvis.objects.create(
@@ -86,6 +117,7 @@ Réponds UNIQUEMENT avec la réponse, sans explication."""
             "reponse": reponse,
             "note": note,
             "auteur": d["auteur_avis"],
+            "ton": ton,
             "mode": "ia" if settings.ANTHROPIC_API_KEY else "demo"
         })
 
@@ -133,13 +165,9 @@ class EnvoyerEmailView(APIView):
 
         try:
             avis = ReponseAvis.objects.get(id=avis_id)
-
             if reponse_editee:
                 avis.reponse_finale = reponse_editee
                 avis.save()
-
-            # Log pour debug
-            logger.error(f"RESEND_API_KEY = '{settings.RESEND_API_KEY[:10]}...'")
 
             status_code = envoyer_reponse_email(destinataire, {
                 "nom_entreprise": avis.nom_entreprise,
@@ -156,6 +184,4 @@ class EnvoyerEmailView(APIView):
                 return Response({"error": f"Erreur envoi : {status_code}"}, status=500)
 
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return Response({"error": str(e)}, status=500)
